@@ -49,7 +49,7 @@ public class Test4 {
         // ModbusListener listener = modbusFactory.createRtuListener(processImage, 31, params, false);
         // ModbusListener listener = modbusFactory.createAsciiListener(processImage, 31, params);
         int port = 5000;
-        final ModbusSlaveSet listener = new TcpSlave(port, true, false);
+        final ModbusSlaveSet listener = new TcpSlave(port, "D:\\modbus-log", false);
         // ModbusSlave listener = modbusFactory.createUdpSlave(processImage, 31);
 
         // Add a few slave process images to the listener.

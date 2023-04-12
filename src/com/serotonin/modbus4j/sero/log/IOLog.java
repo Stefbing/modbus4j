@@ -14,7 +14,7 @@ import java.io.File;
  */
 public class IOLog extends BaseIOLog{
     //private static final Log LOG = LogFactory.getLog(IOLog.class);
-    private static final int MAX_FILESIZE = 1000000;
+    private static final int MAX_FILESIZE = 1024 * 1024 * 10;
     //    private static final int MAX_FILESIZE = 1000;
 
     /**

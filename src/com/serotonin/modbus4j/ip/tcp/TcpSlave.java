@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 public class TcpSlave extends ModbusSlaveSet {
     // Configuration fields
     private final int port;
-    final boolean isLog;
+    final String logPath;
     final boolean encapsulated;
 
     // Runtime fields.
@@ -66,7 +66,7 @@ public class TcpSlave extends ModbusSlaveSet {
      * @param encapsulated a boolean.
      */
     public TcpSlave(boolean encapsulated) {
-        this(ModbusUtils.TCP_PORT, false, encapsulated);
+        this(ModbusUtils.TCP_PORT, null, encapsulated);
     }
 
     /**
@@ -75,9 +75,9 @@ public class TcpSlave extends ModbusSlaveSet {
      * @param port a int.
      * @param encapsulated a boolean.
      */
-    public TcpSlave(int port, boolean isLog, boolean encapsulated) {
+    public TcpSlave(int port, String logPath, boolean encapsulated) {
         this.port = port;
-        this.isLog = isLog;
+        this.logPath = logPath;
         this.encapsulated = encapsulated;
         executorService = Executors.newCachedThreadPool();
     }
@@ -91,7 +91,7 @@ public class TcpSlave extends ModbusSlaveSet {
             Socket socket;
             while (true) {
                 socket = serverSocket.accept();
-                TcpConnectionHandler handler = new TcpConnectionHandler(socket, isLog);
+                TcpConnectionHandler handler = new TcpConnectionHandler(socket, logPath);
                 executorService.execute(handler);
                 synchronized (listConnections) {
                     listConnections.add(handler);
@@ -135,11 +135,11 @@ public class TcpSlave extends ModbusSlaveSet {
         private final Socket socket;
         private TestableTransport transport;
         private MessageControl conn;
-        private boolean isLog;
+        private String logPath;
 
-        TcpConnectionHandler(Socket socket, boolean isLog) throws ModbusInitException {
+        TcpConnectionHandler(Socket socket, String logPath) throws ModbusInitException {
             this.socket = socket;
-            this.isLog = isLog;
+            this.logPath = logPath;
             try {
                 transport = new TestableTransport(socket.getInputStream(), socket.getOutputStream());
             }
@@ -163,8 +163,8 @@ public class TcpSlave extends ModbusSlaveSet {
             }
 
             conn = new MessageControl();
-            if(isLog) {
-                conn.setIoLog(new IOLog("D:\\modbus-log"));
+            if(null != logPath) {
+                conn.setIoLog(new IOLog(logPath));
             }
             conn.setExceptionHandler(getExceptionHandler());
 
