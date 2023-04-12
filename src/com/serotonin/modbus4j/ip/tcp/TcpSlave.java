@@ -6,12 +6,12 @@
  *
  * Copyright (C) 2006-2011 Serotonin Software Technologies Inc. http://serotoninsoftware.com
  * @author Matthew Lohbihler
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -20,15 +20,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.serotonin.modbus4j.ip.tcp;
-
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import com.serotonin.modbus4j.ModbusSlaveSet;
 import com.serotonin.modbus4j.base.BaseMessageParser;
@@ -39,8 +30,18 @@ import com.serotonin.modbus4j.ip.encap.EncapMessageParser;
 import com.serotonin.modbus4j.ip.encap.EncapRequestHandler;
 import com.serotonin.modbus4j.ip.xa.XaMessageParser;
 import com.serotonin.modbus4j.ip.xa.XaRequestHandler;
+import com.serotonin.modbus4j.sero.log.IOLog;
 import com.serotonin.modbus4j.sero.messaging.MessageControl;
 import com.serotonin.modbus4j.sero.messaging.TestableTransport;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>TcpSlave class.</p>
@@ -51,6 +52,7 @@ import com.serotonin.modbus4j.sero.messaging.TestableTransport;
 public class TcpSlave extends ModbusSlaveSet {
     // Configuration fields
     private final int port;
+    final boolean isLog;
     final boolean encapsulated;
 
     // Runtime fields.
@@ -64,7 +66,7 @@ public class TcpSlave extends ModbusSlaveSet {
      * @param encapsulated a boolean.
      */
     public TcpSlave(boolean encapsulated) {
-        this(ModbusUtils.TCP_PORT, encapsulated);
+        this(ModbusUtils.TCP_PORT, false, encapsulated);
     }
 
     /**
@@ -73,8 +75,9 @@ public class TcpSlave extends ModbusSlaveSet {
      * @param port a int.
      * @param encapsulated a boolean.
      */
-    public TcpSlave(int port, boolean encapsulated) {
+    public TcpSlave(int port, boolean isLog, boolean encapsulated) {
         this.port = port;
+        this.isLog = isLog;
         this.encapsulated = encapsulated;
         executorService = Executors.newCachedThreadPool();
     }
@@ -88,7 +91,7 @@ public class TcpSlave extends ModbusSlaveSet {
             Socket socket;
             while (true) {
                 socket = serverSocket.accept();
-                TcpConnectionHandler handler = new TcpConnectionHandler(socket);
+                TcpConnectionHandler handler = new TcpConnectionHandler(socket, isLog);
                 executorService.execute(handler);
                 synchronized (listConnections) {
                     listConnections.add(handler);
@@ -132,9 +135,11 @@ public class TcpSlave extends ModbusSlaveSet {
         private final Socket socket;
         private TestableTransport transport;
         private MessageControl conn;
+        private boolean isLog;
 
-        TcpConnectionHandler(Socket socket) throws ModbusInitException {
+        TcpConnectionHandler(Socket socket, boolean isLog) throws ModbusInitException {
             this.socket = socket;
+            this.isLog = isLog;
             try {
                 transport = new TestableTransport(socket.getInputStream(), socket.getOutputStream());
             }
@@ -158,6 +163,9 @@ public class TcpSlave extends ModbusSlaveSet {
             }
 
             conn = new MessageControl();
+            if(isLog) {
+                conn.setIoLog(new IOLog("D:\\modbus.log"));
+            }
             conn.setExceptionHandler(getExceptionHandler());
 
             try {
