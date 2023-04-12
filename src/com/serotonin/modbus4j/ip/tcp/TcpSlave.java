@@ -164,7 +164,7 @@ public class TcpSlave extends ModbusSlaveSet {
 
             conn = new MessageControl();
             if(isLog) {
-                conn.setIoLog(new IOLog("D:\\modbus.log"));
+                conn.setIoLog(new IOLog("D:\\modbus-log"));
             }
             conn.setExceptionHandler(getExceptionHandler());
 

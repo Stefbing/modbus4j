@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2014 Infinite Automation Software and Serotonin Software. All rights reserved.
- * @author Terry Packer, Matthew Lohbihler 
+ * @author Terry Packer, Matthew Lohbihler
  */
 package com.serotonin.modbus4j.sero.log;
 
@@ -16,7 +16,6 @@ public class IOLog extends BaseIOLog{
     //private static final Log LOG = LogFactory.getLog(IOLog.class);
     private static final int MAX_FILESIZE = 1000000;
     //    private static final int MAX_FILESIZE = 1000;
-    private final File backupFile;
 
     /**
      * <p>Constructor for IOLog.</p>
@@ -25,10 +24,8 @@ public class IOLog extends BaseIOLog{
      */
     public IOLog(String filename) {
     	super(new File(filename));
-        backupFile = new File(filename + ".1");
     }
 
- 
     /** {@inheritDoc} */
     @Override
     protected void sizeCheck() {
@@ -36,9 +33,7 @@ public class IOLog extends BaseIOLog{
         if (file.length() > MAX_FILESIZE) {
             out.close();
 
-            if (backupFile.exists())
-                backupFile.delete();
-            file.renameTo(backupFile);
+            file.renameTo(new File(file.getAbsolutePath() + "_" + System.currentTimeMillis() / 1000));
             createOut();
         }
     }
