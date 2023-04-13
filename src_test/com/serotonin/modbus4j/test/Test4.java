@@ -142,6 +142,9 @@ public class Test4 {
         processImage.setNumeric(RegisterRange.HOLDING_REGISTER, 16, DataType.TWO_BYTE_INT_UNSIGNED_SWAPPED, new Integer(29187));
         //Registery 16 Holds -2 and the data is transmitted as 0b1111110 11111111 which is -257
         processImage.setNumeric(RegisterRange.HOLDING_REGISTER, 17, DataType.TWO_BYTE_INT_SIGNED_SWAPPED, new Integer(-257));
+        processImage.setCoil(12, true);
+        processImage.setHoldingRegister(14, (short) 333);
+        processImage.setHoldingRegister(15, (short) 666);
 
         //Register 18 Holds 1 and the data is transmitted as 0b00000001 00000000 00000000 00000000 which is 16777216
         processImage.setNumeric(RegisterRange.HOLDING_REGISTER, 18, DataType.FOUR_BYTE_INT_UNSIGNED_SWAPPED_SWAPPED, new Long(16777216));

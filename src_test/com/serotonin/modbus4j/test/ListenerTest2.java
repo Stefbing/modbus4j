@@ -1,13 +1,13 @@
 package com.serotonin.modbus4j.test;
 
-import java.util.Random;
-
 import com.serotonin.modbus4j.BasicProcessImage;
 import com.serotonin.modbus4j.ModbusFactory;
 import com.serotonin.modbus4j.ModbusSlaveSet;
 import com.serotonin.modbus4j.code.DataType;
 import com.serotonin.modbus4j.code.RegisterRange;
 import com.serotonin.modbus4j.exception.ModbusInitException;
+
+import java.util.Random;
 
 public class ListenerTest2 {
     static Random random = new Random();
@@ -81,6 +81,10 @@ public class ListenerTest2 {
 
     static BasicProcessImage getModscanProcessImage(int slaveId) {
         BasicProcessImage processImage = new BasicProcessImage(slaveId);
+        processImage.setNumeric(RegisterRange.HOLDING_REGISTER, 0, DataType.TWO_BYTE_INT_UNSIGNED,
+                random.nextInt(10000));
+        processImage.setNumeric(RegisterRange.HOLDING_REGISTER, 3, DataType.FOUR_BYTE_INT_UNSIGNED_SWAPPED,
+                random.nextInt(10000));
         processImage.setAllowInvalidAddress(true);
         processImage.setInvalidAddressValue(Short.MIN_VALUE);
         processImage.setExceptionStatus((byte) 151);
