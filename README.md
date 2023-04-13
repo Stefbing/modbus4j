@@ -1,47 +1,23 @@
 modbus4j
 ========
+个人修改，添加tcp方式报文输出，具体调用示例见ListenerTest2/Test4
 
-A high-performance and ease-of-use implementation of the Modbus protocol written in Java by Infinite Automation Systems and Serotonin Software. Supports ASCII, RTU, TCP, and UDP transports as slave or master, automatic request partitioning and response data type parsing.
+调整：
+1.报文输出路径为可配方式（全路径：包含文件名）
+2.报文调整格式为modbus-poll工具的display-communication的log形式
 
-For support and general help please see our [Forum](https://forum.infiniteautomation.com/category/11/modbus4j-general-discussion)
-
-Commercial licenses are available from https://infiniteautomation.com/modbus4j-open-source-modbus-library/
-
-A public Maven Repository is now available with the latest builds add this to your pom.xml
-
-```xml
-<repositories>
-    <repository>
-        <releases>
-            <enabled>false</enabled>
-        </releases>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-        <id>ias-snapshots</id>
-        <name>Infinite Automation Snapshot Repository</name>
-        <url>https://maven.mangoautomation.net/repository/ias-snapshot/</url>
-    </repository>
-    <repository>
-        <releases>
-            <enabled>true</enabled>
-        </releases>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
-        <id>ias-releases</id>
-        <name>Infinite Automation Release Repository</name>
-        <url>https://maven.mangoautomation.net/repository/ias-release/</url>
-    </repository>
-</repositories>
-```
-
-The dependency information is:
-
-```xml
-<dependency>
-    <groupId>com.infiniteautomation</groupId>
-    <artifactId>modbus4j</artifactId>
-    <version>3.0.3</version>
-</dependency>
-```
+输出报文示例：
+Tx:2023/04/13-14:40:10,685-44 00 00 00 00 06 01 01 02 58 00 12
+Rx:2023/04/13-14:40:10,685-44 00 00 00 00 06 01 01 03 00 00 00
+Tx:2023/04/13-14:40:11,310-45 00 00 00 00 06 01 03 02 BD 00 20
+Rx:2023/04/13-14:40:11,310-45 00 00 00 00 43 01 03 40 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00
+modbus-poll/tcp报文示例：
+Tx:83681-15:21:08.419-00 19 00 00 00 06 01 01 02 58 00 12
+Rx:83682-15:21:08.464-00 19 00 00 00 06 01 01 03 00 00 00
+Tx:83683-15:21:09.342-00 1A 00 00 00 06 01 03 02 BD 00 20
+Rx:83684-15:21:09.362-00 1A 00 00 00 43 01 03 40 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00
+modbus-poll/rtu报文示例：
+Tx:83625-14:39:41.877-01 01 02 58 00 12 3C 6C
+Rx:83626-14:39:42.086-01 01 03 00 00 00 3C 4E
+Tx:83627-14:39:42.546-01 03 02 BD 00 20 D5 8E
+Rx:83628-14:39:42.803-01 03 40 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 80 00 E9 D3
