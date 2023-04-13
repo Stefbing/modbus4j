@@ -33,7 +33,9 @@ import com.serotonin.modbus4j.ip.xa.XaRequestHandler;
 import com.serotonin.modbus4j.sero.log.IOLog;
 import com.serotonin.modbus4j.sero.messaging.MessageControl;
 import com.serotonin.modbus4j.sero.messaging.TestableTransport;
+import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -72,7 +74,7 @@ public class TcpSlave extends ModbusSlaveSet {
     /**
      * <p>Constructor for TcpSlave.</p>
      *
-     * @param port a int.
+     * @param port         a int.
      * @param encapsulated a boolean.
      */
     public TcpSlave(int port, String logPath, boolean encapsulated) {
@@ -82,7 +84,9 @@ public class TcpSlave extends ModbusSlaveSet {
         executorService = Executors.newCachedThreadPool();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void start() throws ModbusInitException {
         try {
@@ -97,20 +101,20 @@ public class TcpSlave extends ModbusSlaveSet {
                     listConnections.add(handler);
                 }
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new ModbusInitException(e);
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void stop() {
         // Close the socket first to prevent new messages.
         try {
             serverSocket.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             getExceptionHandler().receivedException(e);
         }
 
@@ -125,8 +129,7 @@ public class TcpSlave extends ModbusSlaveSet {
         executorService.shutdown();
         try {
             executorService.awaitTermination(3, TimeUnit.SECONDS);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             getExceptionHandler().receivedException(e);
         }
     }
@@ -142,8 +145,7 @@ public class TcpSlave extends ModbusSlaveSet {
             this.logPath = logPath;
             try {
                 transport = new TestableTransport(socket.getInputStream(), socket.getOutputStream());
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw new ModbusInitException(e);
             }
         }
@@ -156,23 +158,31 @@ public class TcpSlave extends ModbusSlaveSet {
             if (encapsulated) {
                 messageParser = new EncapMessageParser(false);
                 requestHandler = new EncapRequestHandler(TcpSlave.this);
-            }
-            else {
+            } else {
                 messageParser = new XaMessageParser(false);
                 requestHandler = new XaRequestHandler(TcpSlave.this);
             }
 
             conn = new MessageControl();
-            if(null != logPath) {
-                conn.setIoLog(new IOLog(logPath));
+            if (StringUtils.isNotBlank(logPath)) {
+                File file = new File(logPath);
+                if (!file.exists()) {
+                    try {
+                        if (file.getParentFile().mkdirs() && file.createNewFile())
+                            conn.setIoLog(new IOLog(logPath));
+                    } catch (IOException e) {
+                        getExceptionHandler().receivedException(e);
+                    }
+                } else {
+                    conn.setIoLog(new IOLog(logPath));
+                }
             }
             conn.setExceptionHandler(getExceptionHandler());
 
             try {
                 conn.start(transport, messageParser, requestHandler, null);
                 executorService.execute(transport);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 getExceptionHandler().receivedException(new ModbusInitException(e));
             }
 
@@ -180,15 +190,13 @@ public class TcpSlave extends ModbusSlaveSet {
             while (true) {
                 try {
                     transport.testInputStream();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     break;
                 }
 
                 try {
                     Thread.sleep(500);
-                }
-                catch (InterruptedException e) {
+                } catch (InterruptedException e) {
                     // no op
                 }
             }
@@ -203,8 +211,7 @@ public class TcpSlave extends ModbusSlaveSet {
         void kill() {
             try {
                 socket.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 getExceptionHandler().receivedException(new ModbusInitException(e));
             }
         }

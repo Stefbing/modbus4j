@@ -1,11 +1,11 @@
 package com.serotonin.modbus4j.test;
 
 import com.serotonin.modbus4j.BasicProcessImage;
-import com.serotonin.modbus4j.ModbusFactory;
 import com.serotonin.modbus4j.ModbusSlaveSet;
 import com.serotonin.modbus4j.code.DataType;
 import com.serotonin.modbus4j.code.RegisterRange;
 import com.serotonin.modbus4j.exception.ModbusInitException;
+import com.serotonin.modbus4j.ip.tcp.TcpSlave;
 
 import java.util.Random;
 
@@ -14,8 +14,7 @@ public class ListenerTest2 {
     static float ir1Value = -100;
 
     public static void main(String[] args) throws Exception {
-        ModbusFactory modbusFactory = new ModbusFactory();
-        final ModbusSlaveSet listener = modbusFactory.createTcpSlave(false);
+        final ModbusSlaveSet listener = new TcpSlave(8899, "D:\\log\\ll", false);
         listener.addProcessImage(getModscanProcessImage(1));
         listener.addProcessImage(getModscanProcessImage(2));
 
