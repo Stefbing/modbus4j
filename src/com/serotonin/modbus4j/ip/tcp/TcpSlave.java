@@ -54,7 +54,7 @@ import java.util.concurrent.TimeUnit;
 public class TcpSlave extends ModbusSlaveSet {
     // Configuration fields
     private final int port;
-    final String logPath;
+    private String logPath;
     final boolean encapsulated;
 
     // Runtime fields.
@@ -95,7 +95,7 @@ public class TcpSlave extends ModbusSlaveSet {
             Socket socket;
             while (true) {
                 socket = serverSocket.accept();
-                TcpConnectionHandler handler = new TcpConnectionHandler(socket, logPath);
+                TcpConnectionHandler handler = new TcpConnectionHandler(socket);
                 executorService.execute(handler);
                 synchronized (listConnections) {
                     listConnections.add(handler);
@@ -138,11 +138,9 @@ public class TcpSlave extends ModbusSlaveSet {
         private final Socket socket;
         private TestableTransport transport;
         private MessageControl conn;
-        private String logPath;
 
-        TcpConnectionHandler(Socket socket, String logPath) throws ModbusInitException {
+        TcpConnectionHandler(Socket socket) throws ModbusInitException {
             this.socket = socket;
-            this.logPath = logPath;
             try {
                 transport = new TestableTransport(socket.getInputStream(), socket.getOutputStream());
             } catch (IOException e) {
@@ -164,16 +162,22 @@ public class TcpSlave extends ModbusSlaveSet {
             }
 
             conn = new MessageControl();
+            //1判断报文路径：空->不写，非空->下一步
+            //2判断路径：无效->创建文件，有效->设置为报文文件路径
             if (StringUtils.isNotBlank(logPath)) {
                 File file = new File(logPath);
                 if (!file.exists()) {
+                    if(!file.getParentFile().exists())
+                        file.getParentFile().mkdirs();
                     try {
-                        if (file.getParentFile().mkdirs() && file.createNewFile())
-                            conn.setIoLog(new IOLog(logPath));
+                        file.createNewFile();
                     } catch (IOException e) {
-                        getExceptionHandler().receivedException(e);
+                        e.printStackTrace();
                     }
+                    conn.setIoLog(new IOLog(logPath));
                 } else {
+                    if(file.isDirectory())
+                        logPath = logPath + File.separator + "modbus_tcp_s.log";
                     conn.setIoLog(new IOLog(logPath));
                 }
             }

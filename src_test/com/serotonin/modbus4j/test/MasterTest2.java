@@ -12,6 +12,10 @@ import com.serotonin.modbus4j.code.DataType;
 import com.serotonin.modbus4j.exception.ErrorResponseException;
 import com.serotonin.modbus4j.ip.IpParameters;
 import com.serotonin.modbus4j.locator.BaseLocator;
+import com.serotonin.modbus4j.sero.log.IOLog;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
 
 /**
  * @author Matthew Lohbihler
@@ -19,17 +23,31 @@ import com.serotonin.modbus4j.locator.BaseLocator;
 public class MasterTest2 {
     public static void main(String[] args) throws Exception {
         IpParameters ipParameters = new IpParameters();
-        ipParameters.setHost("localhost");
+        ipParameters.setHost("192.168.31.112");
         // ipParameters.setHost("99.247.60.96");
         // ipParameters.setHost("193.109.41.121");
         //ipParameters.setHost("141.211.194.29");
-        ipParameters.setPort(502);
+        ipParameters.setPort(8899);
 
         ModbusFactory modbusFactory = new ModbusFactory();
         // ModbusMaster master = modbusFactory.createTcpMaster(ipParameters, true);
         ModbusMaster master = modbusFactory.createTcpMaster(ipParameters, false);
+        String logPath = "D:\\123";
+        if (StringUtils.isNotBlank(logPath)) {
+            File file = new File(logPath);
+            if (!file.exists()) {
+                if(!file.getParentFile().exists())
+                    file.getParentFile().mkdirs();
+                file.createNewFile();
+                master.setIoLog(new IOLog(logPath));
+            } else {
+                if(file.isDirectory())
+                    logPath = logPath + File.separator + "modbus.log";
+                master.setIoLog(new IOLog(logPath));
+            }
+        }
         master.setTimeout(4000);
-        master.setRetries(1);
+        master.setRetries(4);
 
         BatchRead<Integer> batch = new BatchRead<Integer>();
         //        batch.addLocator(0, new ModbusLocator(1, RegisterRange.COIL_STATUS, 2048, DataType.BINARY));
@@ -50,8 +68,8 @@ public class MasterTest2 {
         //        batch.addLocator(16, new ModbusLocator(1, RegisterRange.COIL_STATUS, 3668, DataType.BINARY));
         //        batch.addLocator(18, new ModbusLocator(1, RegisterRange.COIL_STATUS, 3969, DataType.BINARY));
 
-        batch.addLocator(0, BaseLocator.holdingRegister(5, 80, DataType.TWO_BYTE_INT_SIGNED));
-        batch.addLocator(1, BaseLocator.holdingRegister(5, 202, DataType.EIGHT_BYTE_INT_SIGNED));
+        batch.addLocator(0, BaseLocator.holdingRegister(1, 80, DataType.TWO_BYTE_INT_SIGNED));
+        batch.addLocator(1, BaseLocator.holdingRegister(1, 202, DataType.EIGHT_BYTE_INT_SIGNED));
 
         try {
             master.init();
@@ -64,11 +82,9 @@ public class MasterTest2 {
 
                 Thread.sleep(2000);
             }
-        }
-        catch (ErrorResponseException e) {
+        } catch (ErrorResponseException e) {
             System.out.println(e.getErrorResponse().getExceptionMessage());
-        }
-        finally {
+        } finally {
             master.destroy();
         }
     }
